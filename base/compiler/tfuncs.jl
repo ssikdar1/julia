@@ -1393,15 +1393,26 @@ function builtin_tfunction(@nospecialize(f), argtypes::Array{Any,1},
 end
 
 # Query whether the given intrinsic is nothrow
-intrinsic_nothrow(f::IntrinsicFunction) = !(
-        f === Intrinsics.checked_sdiv_int ||
-        f === Intrinsics.checked_udiv_int ||
-        f === Intrinsics.checked_srem_int ||
-        f === Intrinsics.checked_urem_int ||
-        f === Intrinsics.cglobal
-    )
 
 function intrinsic_nothrow(f::IntrinsicFunction, argtypes::Array{Any, 1})
+    # First check that we have the correct number of arguments
+    iidx = Int(reinterpret(Int32, f::IntrinsicFunction)) + 1
+    if iidx < 0 || iidx > length(T_IFUNC)
+        # invalid intrinsic
+        return false
+    end
+    tf = T_IFUNC[iidx]
+    tf = tf::Tuple{Int, Int, Any}
+    if !(tf[1] <= length(argtypes) <= tf[2])
+        # wrong # of args
+        return false
+    end
+    for i = 1:length(argtypes)
+        # Intrinsics are defined only on primitive types
+        if !isprimitivetype(widenconst(argtypes[i]))
+            return false
+        end
+    end
     # TODO: We could do better for cglobal
     f === Intrinsics.cglobal && return false
     if f === Intrinsics.checked_udiv_int || f === Intrinsics.checked_urem_int || f === Intrinsics.checked_srem_int || f === Intrinsics.checked_sdiv_int

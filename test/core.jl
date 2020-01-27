@@ -7173,3 +7173,10 @@ function f34247(a)
     true
 end
 @test f34247("")
+
+# Issue #34482
+function f34482()
+    Base.not_int("ABC")
+    1
+end
+@test_throws ErrorException f34482()
