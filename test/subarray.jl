@@ -648,11 +648,12 @@ _test_27632(view(ones(Int64, (1, 1, 1)), 1, 1, 1))
 # issue #29608 - views of single values can be considered contiguous
 @test Base.iscontiguous(view(ones(1), 1))
 
+import InteractiveUtils
 @testset "blas-enabled reshaped indices" begin
     p = rand(30)
     M = view(p, reshape(2:25, 6, 4))
     v = rand(4)
     @test M isa StridedArray
     @test M*v == copy(M)*v
-    @test (@which M*v) == (@which copy(M)*v)
+    @test (InteractiveUtils.@which M*v) == (InteractiveUtils.@which copy(M)*v)
 end
