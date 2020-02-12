@@ -2,7 +2,7 @@
 
 using Test
 using Distributed
-using Dates
+using Dates: DateTime, now
 import REPL
 using Printf: @sprintf
 
